@@ -1,8 +1,11 @@
 import com.denisyordanp.pokemonapp.PokemonAndroidConfig
+import com.denisyordanp.pokemonapp.PokemonModule
 
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-kapt")
+    alias(libs.plugins.android.hilt)
 }
 
 android {
@@ -52,8 +55,16 @@ android {
 }
 
 dependencies {
+    implementation(project(PokemonModule.Schema.UI))
+    implementation(project(PokemonModule.Main.DOMAIN))
+    implementation(project(PokemonModule.Main.COMMON))
 
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlin.coroutine)
+
+    implementation(libs.dagger.hilt)
+    kapt(libs.dagger.compiler)
+
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
@@ -61,6 +72,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.navigation)
+    implementation(libs.androidx.hilt.navigation)
+    implementation(libs.androidx.compose.accompanist)
 
     testImplementation(libs.junit)
 
