@@ -19,6 +19,12 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Pokemon App"
+rootProject.name = "PokemonApp"
 include(":app")
- 
+include(":core")
+include(":data")
+include(":domain")
+
+include(":schema:response")
+include(":schema:entity")
+include(":schema:ui")

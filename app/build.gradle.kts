@@ -1,16 +1,18 @@
+import com.denisyordanp.pokemonapp.PokemonAndroidConfig
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
-    namespace = "com.denisyordanp.pokemonapp"
-    compileSdk = 34
+    namespace = PokemonAndroidConfig.NAMESPACE
+    compileSdk = PokemonAndroidConfig.COMPILE_SDK
 
     defaultConfig {
-        applicationId = "com.denisyordanp.pokemonapp"
-        minSdk = 24
-        targetSdk = 34
+        applicationId = PokemonAndroidConfig.NAMESPACE
+        minSdk = PokemonAndroidConfig.MIN_SDK
+        targetSdk = PokemonAndroidConfig.TARGET_SDK
         versionCode = 1
         versionName = "1.0"
 
@@ -30,17 +32,17 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = PokemonAndroidConfig.COMPATIBILITY_VERSION
+        targetCompatibility = PokemonAndroidConfig.COMPATIBILITY_VERSION
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = PokemonAndroidConfig.JVM_TARGET_VERSION
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = PokemonAndroidConfig.COMPOSE_OPTION_VERSION
     }
     packaging {
         resources {
@@ -59,11 +61,14 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
