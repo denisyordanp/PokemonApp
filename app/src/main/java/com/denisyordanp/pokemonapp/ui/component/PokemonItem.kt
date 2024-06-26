@@ -3,7 +3,9 @@ package com.denisyordanp.pokemonapp.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,10 +29,10 @@ fun PokemonItem(
     ) {
         nickname?.let {
             Text(
-                modifier = Modifier.weight(1f),
                 text = it,
-                style = MaterialTheme.typography.titleSmall
+                style = MaterialTheme.typography.titleLarge
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         Text(

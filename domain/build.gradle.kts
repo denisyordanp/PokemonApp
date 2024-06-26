@@ -30,6 +30,7 @@ dependencies {
     implementation(project(PokemonModule.Main.COMMON))
     implementation(project(PokemonModule.Schema.RESPONSE))
     implementation(project(PokemonModule.Schema.UI))
+    implementation(project(PokemonModule.Schema.ENTITY))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlin.coroutine)

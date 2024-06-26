@@ -1,9 +1,13 @@
 package com.denisyordanp.pokemonapp.domain.di
 
+import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemonDetail
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemons
+import com.denisyordanp.pokemonapp.domain.api.LoadMyPokemon
+import com.denisyordanp.pokemonapp.domain.impl.CatchPokemonImpl
 import com.denisyordanp.pokemonapp.domain.impl.FetchPokemonDetailImpl
 import com.denisyordanp.pokemonapp.domain.impl.FetchPokemonsImpl
+import com.denisyordanp.pokemonapp.domain.impl.LoadMyPokemonImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -21,4 +25,14 @@ abstract class DomainModule {
     abstract fun bindFetchPokemonDetail(
         fetchPokemonDetail: FetchPokemonDetailImpl
     ): FetchPokemonDetail
+
+    @Binds
+    abstract fun bindLoadMyPokemon(
+        loadMyPokemon: LoadMyPokemonImpl
+    ): LoadMyPokemon
+
+    @Binds
+    abstract fun bindCatchPokemon(
+        catchPokemon: CatchPokemonImpl
+    ): CatchPokemon
 }

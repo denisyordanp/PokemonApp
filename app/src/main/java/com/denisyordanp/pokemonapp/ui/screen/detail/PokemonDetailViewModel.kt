@@ -3,9 +3,8 @@ package com.denisyordanp.pokemonapp.ui.screen.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.denisyordanp.pokemonapp.common.di.IoDispatcher
+import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemonDetail
-import com.denisyordanp.pokemonapp.schema.ui.Paging
-import com.denisyordanp.pokemonapp.schema.ui.Pokemon
 import com.denisyordanp.pokemonapp.schema.ui.PokemonDetail
 import com.denisyordanp.pokemonapp.util.UiState
 import com.denisyordanp.pokemonapp.util.UiStatus
@@ -17,11 +16,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class PokemonDetailViewModel @Inject constructor(
     private val fetchDetailPokemon: FetchPokemonDetail,
+    private val catchPokemon: CatchPokemon,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _pokemonDetailState = MutableStateFlow<UiState<PokemonDetail>>(UiState())
@@ -29,7 +30,9 @@ class PokemonDetailViewModel @Inject constructor(
 
     fun loadPokemonDetail(id: String) = viewModelScope.launch(dispatcher) {
         _pokemonDetailState.update {
-            if (it.status != UiStatus.INITIAL) { it.loadMore() } else it
+            if (it.status != UiStatus.INITIAL) {
+                it.loadMore()
+            } else it
         }
 
         try {
@@ -40,7 +43,8 @@ class PokemonDetailViewModel @Inject constructor(
         }
     }
 
-    fun catchPokemon(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
-
+    fun catch(pokemon: PokemonDetail, nickname: String) = viewModelScope.launch(dispatcher) {
+        val currentTime = Date().time
+        catchPokemon(pokemon, currentTime, nickname)
     }
 }

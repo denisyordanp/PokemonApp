@@ -1,22 +1,30 @@
 package com.denisyordanp.pokemonapp.ui.screen.detail
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -57,6 +65,11 @@ fun pokemonDetailRoute(
                         coroutineScope.launch {
                             snackBar.showSnackbar("Error happening, please try again.")
                         }
+                    },
+                    onCaught = {
+                        coroutineScope.launch {
+                            snackBar.showSnackbar("$it successfully caught")
+                        }
                     }
                 )
             }
@@ -68,8 +81,11 @@ fun pokemonDetailRoute(
 private fun PokemonDetailScreen(
     viewModel: PokemonDetailViewModel = hiltViewModel(),
     id: String,
+    onCaught: (nickname: String) -> Unit,
     onError: (e: Exception) -> Unit,
 ) {
+    val coroutineScope = LocalCoroutineScope.current
+
     LaunchedEffectOneTime {
         viewModel.loadPokemonDetail(id)
     }
@@ -91,6 +107,7 @@ private fun PokemonDetailScreen(
         }
     }
     val refreshState = rememberSwipeRefreshState(isRefreshing = isLoadMoreDataLoadingMore)
+    val selectedCatchPokemon = remember { mutableStateOf<PokemonDetailActionType>(PokemonDetailActionType.Idle) }
 
     LaunchedEffectKeyed(pokemonDetailState.value) {
         if (it?.status == UiStatus.ERROR) it.error?.apply(onError)
@@ -110,16 +127,72 @@ private fun PokemonDetailScreen(
         pokemonDetail?.let {
             SwipeRefresh(
                 state = refreshState,
-                onRefresh = {
-                    viewModel.loadPokemonDetail(id)
-                }
+                onRefresh = { viewModel.loadPokemonDetail(id) }
             ) {
                 PokemonDetailContent(
                     pokemonDetail = it,
-                    onCatch = {
-                        viewModel.catchPokemon(it)
+                    onMainActionButtonClicked = {
+                        selectedCatchPokemon.value = if (it.isMyPokemon) {
+                            PokemonDetailActionType.Release(it)
+                        } else PokemonDetailActionType.Catch(it)
+                    },
+                    onEditNickname = {
+                        selectedCatchPokemon.value = PokemonDetailActionType.EditNickname(it)
                     }
                 )
+            }
+        }
+    }
+
+    NicknameModal(
+        actionType = selectedCatchPokemon,
+        onCatch = { pokemon, nickname ->
+            coroutineScope.launch {
+                viewModel.catch(pokemon, nickname)
+                selectedCatchPokemon.value = PokemonDetailActionType.Idle
+                onCaught(nickname)
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NicknameModal(
+    actionType: MutableState<PokemonDetailActionType>,
+    onCatch: (pokemon: PokemonDetail, nickname: String) -> Unit,
+) = with(actionType.value) {
+    pokemon?.let {
+        var nicknameText by remember { mutableStateOf(actionType.value.pokemon?.nickname.orEmpty()) }
+
+        ModalBottomSheet(
+            onDismissRequest = {
+                nicknameText = ""
+                actionType.value = PokemonDetailActionType.Idle
+            },
+            windowInsets = WindowInsets.ime
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "Catch ${it.name}")
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedTextField(modifier = Modifier.fillMaxWidth(), label = {
+                    Text(text = "Enter nickname")
+                }, value = nicknameText, onValueChange = { nicknameText = it })
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(onClick = {
+                    onCatch(it, nicknameText)
+                }) {
+                    Text(text = "Catch")
+                }
             }
         }
     }
@@ -128,7 +201,8 @@ private fun PokemonDetailScreen(
 @Composable
 private fun PokemonDetailContent(
     pokemonDetail: PokemonDetail,
-    onCatch: () -> Unit
+    onMainActionButtonClicked: () -> Unit,
+    onEditNickname: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -144,11 +218,13 @@ private fun PokemonDetailContent(
         )
 
         Text(
-            text = "Species: ${pokemonDetail.species.name.replaceFirstChar {
-                if (it.isLowerCase()) it.titlecase(
-                    Locale.getDefault()
-                ) else it.toString()
-            }}",
+            text = "Species: ${
+                pokemonDetail.species.name.replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(
+                        Locale.getDefault()
+                    ) else it.toString()
+                }
+            }",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -173,11 +249,24 @@ private fun PokemonDetailContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedButton(
-            modifier = Modifier.padding(16.dp),
-            onClick = onCatch
-        ) {
-            Text(text = "Catch this Pokemon")
+        Row {
+            if (pokemonDetail.isMyPokemon) {
+                OutlinedButton(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = onEditNickname
+                ) {
+                    Text(text = "Edit nickname")
+                }
+            }
+
+            OutlinedButton(
+                modifier = Modifier.padding(16.dp),
+                onClick = onMainActionButtonClicked
+            ) {
+                Text(
+                    text = if (pokemonDetail.isMyPokemon) "Release this Pokemon" else "Catch this Pokemon"
+                )
+            }
         }
     }
 }

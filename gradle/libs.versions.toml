@@ -15,6 +15,8 @@ retrofit = "2.9.0"
 hilt = "2.49"
 coroutine = "1.8.0"
 okHttpLogging = "4.9.3"
+room = "2.6.1"
+ksp = "1.9.0-1.0.13"
 
 
 [libraries]
@@ -23,7 +25,13 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+kotlin-coroutine = { group = "org.jetbrains.kotlinx", name ="kotlinx-coroutines-android", version.ref = "coroutine" }
+
+androidx-room-runtime = { group = "androidx.room", name ="room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name ="room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name ="room-compiler", version.ref = "room" }
 
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -47,11 +55,11 @@ rerofit-logging = { group = "com.squareup.okhttp3", name ="logging-interceptor",
 
 dagger-hilt = { group = "com.google.dagger", name ="hilt-android", version.ref = "hilt" }
 dagger-compiler = { group = "com.google.dagger", name ="hilt-compiler", version.ref = "hilt" }
-kotlin-coroutine = { group = "org.jetbrains.kotlinx", name ="kotlinx-coroutines-android", version.ref = "coroutine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 android-hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 

@@ -4,6 +4,7 @@ import com.denisyordanp.pokemonapp.PokemonModule
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlin.ksp)
     id("kotlin-kapt")
     alias(libs.plugins.android.hilt)
 }
@@ -30,12 +31,17 @@ android {
 
 dependencies {
     implementation(project(PokemonModule.Schema.RESPONSE))
+    implementation(project(PokemonModule.Schema.ENTITY))
 
     implementation(libs.androidx.core.ktx)
 
     implementation(libs.rerofit.base)
     implementation(libs.rerofit.gson)
     implementation(libs.rerofit.logging)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 
     implementation(libs.dagger.hilt)
     kapt(libs.dagger.compiler)

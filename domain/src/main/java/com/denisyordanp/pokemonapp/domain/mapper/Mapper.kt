@@ -3,6 +3,7 @@ package com.denisyordanp.pokemonapp.domain.mapper
 import com.denisyordanp.pokemonapp.common.extension.orZero
 import com.denisyordanp.pokemonapp.domain.util.getIdFromPokemonUrl
 import com.denisyordanp.pokemonapp.domain.util.getOffsetFromUrl
+import com.denisyordanp.pokemonapp.schema.entity.MyPokemonEntity
 import com.denisyordanp.pokemonapp.schema.response.PokemonDetailResponse
 import com.denisyordanp.pokemonapp.schema.response.PokemonListResponse
 import com.denisyordanp.pokemonapp.schema.response.PokemonResponse
@@ -29,14 +30,15 @@ fun PokemonResponse.toPokemon(): Pokemon {
     )
 }
 
-fun PokemonDetailResponse.toPokemonDetail(): PokemonDetail {
+fun PokemonDetailResponse.toPokemonDetail(isMyPokemon: Boolean): PokemonDetail {
     return PokemonDetail(
-        id = id.orZero(),
+        id = id.orEmpty(),
         name = name.orEmpty(),
         height = height.orZero(),
         weight = weight.orZero(),
         baseExperience = baseExperience.orZero(),
-        species = species.toSpecies()
+        species = species.toSpecies(),
+        isMyPokemon = isMyPokemon
     )
 }
 
@@ -44,5 +46,13 @@ fun SpeciesResponse?.toSpecies(): Species {
     return Species(
         name = this?.name.orEmpty()
     )
+}
+
+fun MyPokemonEntity.toPokemon(): Pokemon {
+    return Pokemon(id = id, name = name, nickname = nickname)
+}
+
+fun PokemonDetail.toMyPokemonEntity(currentTime: Long, nickname: String): MyPokemonEntity {
+    return MyPokemonEntity(id = id, name = name, nickname = nickname, updatedTime = currentTime)
 }
 

@@ -10,6 +10,7 @@ object PokemonModule {
 
     object Schema {
         const val RESPONSE = ":schema:response"
+        const val ENTITY = ":schema:entity"
         const val UI = ":schema:ui"
     }
 }

@@ -9,7 +9,7 @@ data class PokemonDetailResponse(
     @SerializedName("height")
     val height: Int?,
     @SerializedName("id")
-    val id: Int?,
+    val id: String?,
     @SerializedName("name")
     val name: String?,
     @SerializedName("species")

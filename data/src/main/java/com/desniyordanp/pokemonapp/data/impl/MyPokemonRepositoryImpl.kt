@@ -1,0 +1,26 @@
+package com.desniyordanp.pokemonapp.data.impl
+
+import com.denisyordanp.pokemonapp.common.di.IoDispatcher
+import com.denisyordanp.pokemonapp.core.database.dao.MyPokemonDao
+import com.denisyordanp.pokemonapp.schema.entity.MyPokemonEntity
+import com.desniyordanp.pokemonapp.data.api.MyPokemonRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+class MyPokemonRepositoryImpl @Inject constructor(
+    private val dao: MyPokemonDao,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher
+) : MyPokemonRepository {
+    override fun getMyPokemons() = dao.getMyPokemons()
+    override suspend fun getMyPokemon(id: String) = dao.getMyPokemonById(id)
+
+    override suspend fun addMyPokemon(pokemon: MyPokemonEntity) = withContext(dispatcher) {
+        dao.addPokemon(pokemon)
+    }
+
+    override suspend fun removeMyPokemon(id: String) = withContext(dispatcher) {
+        dao.remove(id)
+    }
+}

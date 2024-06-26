@@ -27,6 +27,7 @@ import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.DETAIL_SCRE
 import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.MY_POKEMON_SCREEN
 import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.POKEMON_SCREEN
 import com.denisyordanp.pokemonapp.ui.screen.detail.pokemonDetailRoute
+import com.denisyordanp.pokemonapp.ui.screen.mypokemon.myPokemonRoute
 import com.denisyordanp.pokemonapp.ui.screen.pokemonlist.pokemonListRoute
 import com.denisyordanp.pokemonapp.ui.theme.PokemonAppTheme
 import com.denisyordanp.pokemonapp.util.LocalCoroutineScope
@@ -75,9 +76,7 @@ class MainActivity : ComponentActivity() {
 
                             pokemonDetailRoute(this)
 
-                            composable(MY_POKEMON_SCREEN.route) {
-                                TODO("My pokemon screen")
-                            }
+                            myPokemonRoute(this)
                         }
                     }
                 }
