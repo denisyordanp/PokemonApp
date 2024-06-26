@@ -16,8 +16,9 @@ class FetchPokemonDetailImpl @Inject constructor(
 ) : FetchPokemonDetail {
     override suspend fun invoke(id: String) = withContext(dispatcher) {
         val response = repository.fetchPokemonDetail(id)
-        val isMyPokemon = myPokemonRepository.getMyPokemon(id) != null
+        val foundedPokemon = myPokemonRepository.getMyPokemon(id)
+        val isMyPokemon = foundedPokemon != null
 
-        response.toPokemonDetail(isMyPokemon)
+        response.toPokemonDetail(isMyPokemon, foundedPokemon?.nickname)
     }
 }

@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.denisyordanp.pokemonapp.common.di.IoDispatcher
 import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
+import com.denisyordanp.pokemonapp.domain.api.EditPokemonNickname
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemonDetail
+import com.denisyordanp.pokemonapp.domain.api.ReleasePokemon
 import com.denisyordanp.pokemonapp.schema.ui.PokemonDetail
 import com.denisyordanp.pokemonapp.util.UiState
 import com.denisyordanp.pokemonapp.util.UiStatus
@@ -23,6 +25,8 @@ import javax.inject.Inject
 class PokemonDetailViewModel @Inject constructor(
     private val fetchDetailPokemon: FetchPokemonDetail,
     private val catchPokemon: CatchPokemon,
+    private val editPokemonNickname: EditPokemonNickname,
+    private val releasePokemon: ReleasePokemon,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _pokemonDetailState = MutableStateFlow<UiState<PokemonDetail>>(UiState())
@@ -43,8 +47,20 @@ class PokemonDetailViewModel @Inject constructor(
         }
     }
 
-    fun catch(pokemon: PokemonDetail, nickname: String) = viewModelScope.launch(dispatcher) {
+    fun catch(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
         val currentTime = Date().time
-        catchPokemon(pokemon, currentTime, nickname)
+        catchPokemon(pokemon, currentTime)
+        loadPokemonDetail(pokemon.id)
+    }
+
+    fun editNickname(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
+        val currentTime = Date().time
+        editPokemonNickname(pokemon, currentTime)
+        loadPokemonDetail(pokemon.id)
+    }
+
+    fun release(id: String) = viewModelScope.launch(dispatcher) {
+        releasePokemon(id)
+        loadPokemonDetail(id)
     }
 }

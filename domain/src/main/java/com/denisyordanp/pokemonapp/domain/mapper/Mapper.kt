@@ -30,7 +30,7 @@ fun PokemonResponse.toPokemon(): Pokemon {
     )
 }
 
-fun PokemonDetailResponse.toPokemonDetail(isMyPokemon: Boolean): PokemonDetail {
+fun PokemonDetailResponse.toPokemonDetail(isMyPokemon: Boolean, nickname: String?): PokemonDetail {
     return PokemonDetail(
         id = id.orEmpty(),
         name = name.orEmpty(),
@@ -38,7 +38,8 @@ fun PokemonDetailResponse.toPokemonDetail(isMyPokemon: Boolean): PokemonDetail {
         weight = weight.orZero(),
         baseExperience = baseExperience.orZero(),
         species = species.toSpecies(),
-        isMyPokemon = isMyPokemon
+        isMyPokemon = isMyPokemon,
+        nickname = nickname
     )
 }
 
@@ -52,7 +53,12 @@ fun MyPokemonEntity.toPokemon(): Pokemon {
     return Pokemon(id = id, name = name, nickname = nickname)
 }
 
-fun PokemonDetail.toMyPokemonEntity(currentTime: Long, nickname: String): MyPokemonEntity {
-    return MyPokemonEntity(id = id, name = name, nickname = nickname, updatedTime = currentTime)
+fun PokemonDetail.toMyPokemonEntity(currentTime: Long): MyPokemonEntity {
+    return MyPokemonEntity(
+        id = id,
+        name = name,
+        nickname = nickname.orEmpty(),
+        updatedTime = currentTime
+    )
 }
 

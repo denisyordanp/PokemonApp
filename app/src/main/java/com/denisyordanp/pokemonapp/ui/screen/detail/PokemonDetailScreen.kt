@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,10 +43,7 @@ import com.denisyordanp.pokemonapp.util.LaunchedEffectOneTime
 import com.denisyordanp.pokemonapp.util.LocalCoroutineScope
 import com.denisyordanp.pokemonapp.util.LocalSnackBar
 import com.denisyordanp.pokemonapp.util.UiStatus
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import kotlinx.coroutines.launch
-import java.util.Locale
 
 fun pokemonDetailRoute(
     navGraphBuilder: NavGraphBuilder
@@ -66,9 +64,9 @@ fun pokemonDetailRoute(
                             snackBar.showSnackbar("Error happening, please try again.")
                         }
                     },
-                    onCaught = {
+                    onSuccessAction = {
                         coroutineScope.launch {
-                            snackBar.showSnackbar("$it successfully caught")
+                            snackBar.showSnackbar(it)
                         }
                     }
                 )
@@ -81,7 +79,7 @@ fun pokemonDetailRoute(
 private fun PokemonDetailScreen(
     viewModel: PokemonDetailViewModel = hiltViewModel(),
     id: String,
-    onCaught: (nickname: String) -> Unit,
+    onSuccessAction: (message: String) -> Unit,
     onError: (e: Exception) -> Unit,
 ) {
     val coroutineScope = LocalCoroutineScope.current
@@ -106,8 +104,8 @@ private fun PokemonDetailScreen(
             pokemonDetailState.value.status == UiStatus.INITIAL
         }
     }
-    val refreshState = rememberSwipeRefreshState(isRefreshing = isLoadMoreDataLoadingMore)
-    val selectedCatchPokemon = remember { mutableStateOf<PokemonDetailActionType>(PokemonDetailActionType.Idle) }
+    val selectedCatchPokemon =
+        remember { mutableStateOf<PokemonDetailActionType>(PokemonDetailActionType.Idle) }
 
     LaunchedEffectKeyed(pokemonDetailState.value) {
         if (it?.status == UiStatus.ERROR) it.error?.apply(onError)
@@ -125,77 +123,48 @@ private fun PokemonDetailScreen(
         }
 
         pokemonDetail?.let {
-            SwipeRefresh(
-                state = refreshState,
-                onRefresh = { viewModel.loadPokemonDetail(id) }
-            ) {
-                PokemonDetailContent(
-                    pokemonDetail = it,
-                    onMainActionButtonClicked = {
-                        selectedCatchPokemon.value = if (it.isMyPokemon) {
-                            PokemonDetailActionType.Release(it)
-                        } else PokemonDetailActionType.Catch(it)
-                    },
-                    onEditNickname = {
-                        selectedCatchPokemon.value = PokemonDetailActionType.EditNickname(it)
-                    }
-                )
-            }
+            PokemonDetailContent(
+                pokemonDetail = it,
+                onMainActionButtonClicked = {
+                    selectedCatchPokemon.value = if (it.isMyPokemon) {
+                        PokemonDetailActionType.Release(it)
+                    } else PokemonDetailActionType.Catch(it)
+                },
+                onEditNickname = {
+                    selectedCatchPokemon.value = PokemonDetailActionType.EditNickname(it)
+                }
+            )
         }
     }
 
     NicknameModal(
         actionType = selectedCatchPokemon,
-        onCatch = { pokemon, nickname ->
+        onSubmit = { pokemon ->
             coroutineScope.launch {
-                viewModel.catch(pokemon, nickname)
+                val nickname = pokemon.nickname.orEmpty()
+
+                if (selectedCatchPokemon.value is PokemonDetailActionType.EditNickname) {
+                    viewModel.editNickname(pokemon)
+                    onSuccessAction("Successfully changed nickname to $nickname")
+                } else {
+                    viewModel.catch(pokemon)
+                    onSuccessAction("$nickname successfully caught")
+                }
                 selectedCatchPokemon.value = PokemonDetailActionType.Idle
-                onCaught(nickname)
             }
         }
     )
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NicknameModal(
-    actionType: MutableState<PokemonDetailActionType>,
-    onCatch: (pokemon: PokemonDetail, nickname: String) -> Unit,
-) = with(actionType.value) {
-    pokemon?.let {
-        var nicknameText by remember { mutableStateOf(actionType.value.pokemon?.nickname.orEmpty()) }
-
-        ModalBottomSheet(
-            onDismissRequest = {
-                nicknameText = ""
-                actionType.value = PokemonDetailActionType.Idle
-            },
-            windowInsets = WindowInsets.ime
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Catch ${it.name}")
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                OutlinedTextField(modifier = Modifier.fillMaxWidth(), label = {
-                    Text(text = "Enter nickname")
-                }, value = nicknameText, onValueChange = { nicknameText = it })
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(onClick = {
-                    onCatch(it, nicknameText)
-                }) {
-                    Text(text = "Catch")
-                }
+    ReleaseWarningModal(
+        actionType = selectedCatchPokemon,
+        onYes = {
+            coroutineScope.launch {
+                viewModel.release(it.id)
+                onSuccessAction("${it.name} successfully released")
+                selectedCatchPokemon.value = PokemonDetailActionType.Idle
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -211,20 +180,22 @@ private fun PokemonDetailContent(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        pokemonDetail.nickname?.let {
+            Text(
+                modifier = Modifier.padding(bottom = 8.dp),
+                text = it.capitalize(),
+                style = MaterialTheme.typography.titleLarge
+            )
+        }
+
         Text(
             modifier = Modifier.padding(bottom = 8.dp),
-            text = pokemonDetail.name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-            style = MaterialTheme.typography.titleLarge
+            text = pokemonDetail.name.capitalize(),
+            style = MaterialTheme.typography.titleMedium
         )
 
         Text(
-            text = "Species: ${
-                pokemonDetail.species.name.replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(
-                        Locale.getDefault()
-                    ) else it.toString()
-                }
-            }",
+            text = "Species: ${pokemonDetail.species.name.capitalize()}",
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -266,6 +237,105 @@ private fun PokemonDetailContent(
                 Text(
                     text = if (pokemonDetail.isMyPokemon) "Release this Pokemon" else "Catch this Pokemon"
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NicknameModal(
+    actionType: MutableState<PokemonDetailActionType>,
+    onSubmit: (pokemon: PokemonDetail) -> Unit,
+) = with(actionType.value) {
+    if (this is PokemonDetailActionType.Catch || this is PokemonDetailActionType.EditNickname) {
+        pokemon?.let {
+            val isEdit by remember {
+                derivedStateOf { this is PokemonDetailActionType.EditNickname }
+            }
+            var nicknameText by remember { mutableStateOf(actionType.value.pokemon?.nickname.orEmpty()) }
+
+            ModalBottomSheet(
+                onDismissRequest = {
+                    nicknameText = ""
+                    actionType.value = PokemonDetailActionType.Idle
+                },
+                windowInsets = WindowInsets.ime
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    val title = if (isEdit) "Edit nickname for ${it.name}" else "Catch ${it.name}"
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedTextField(modifier = Modifier.fillMaxWidth(), label = {
+                        Text(text = "Enter nickname")
+                    }, value = nicknameText, onValueChange = { nicknameText = it })
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedButton(onClick = {
+                        onSubmit(it.copy(nickname = nicknameText))
+                    }) {
+                        val text = if (isEdit) "Save" else "Catch"
+                        Text(text = text)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReleaseWarningModal(
+    actionType: MutableState<PokemonDetailActionType>,
+    onYes: (pokemon: PokemonDetail) -> Unit
+) {
+    if (actionType.value is PokemonDetailActionType.Release) {
+        actionType.value.pokemon?.let {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    actionType.value = PokemonDetailActionType.Idle
+                }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Are you sure want to release ${it.name}}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row {
+                        OutlinedButton(onClick = {
+                            actionType.value = PokemonDetailActionType.Idle
+                        }) {
+                            Text(text = "Cancel")
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        OutlinedButton(onClick = {
+                            onYes(it)
+                        }) {
+                            Text(text = "Yes")
+                        }
+                    }
+                }
             }
         }
     }
