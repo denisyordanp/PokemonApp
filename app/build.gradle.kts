@@ -74,7 +74,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.navigation)
     implementation(libs.androidx.hilt.navigation)
-    implementation(libs.androidx.compose.accompanist)
+    implementation(libs.androidx.accompanist.systemui)
+    implementation(libs.androidx.accompanist.swiperefresh)
 
     testImplementation(libs.junit)
 

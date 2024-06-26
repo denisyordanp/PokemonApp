@@ -37,7 +37,7 @@ fun TopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
+                .padding(start = 4.dp, end = 16.dp)
                 .height(50.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

@@ -11,7 +11,7 @@ import com.denisyordanp.pokemonapp.util.LaunchedEffectOneTime
 
 @Composable
 fun PagingColumn(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onNeedLoadMore: () -> Unit,
     content: LazyListScope.() -> Unit
 ) {

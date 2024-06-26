@@ -2,6 +2,11 @@ package com.denisyordanp.pokemonapp.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
 import com.denisyordanp.pokemonapp.ui.main.AppNavigator
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +36,14 @@ fun <T> LaunchedEffectKeyed(
 fun LaunchedEffectOneTime(
     block: suspend CoroutineScope.() -> Unit
 ) {
-    LaunchedEffect(key1 = Unit) { block() }
+    var hasRun by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = Unit) {
+        if (hasRun.not()) {
+            block()
+            hasRun = true
+        }
+    }
 }
 
 fun <T> UiState<T>.loadMore() = this.copy(error = null, status = UiStatus.LOAD_MORE)

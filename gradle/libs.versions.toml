@@ -14,6 +14,7 @@ accompanist = "0.23.1"
 retrofit = "2.9.0"
 hilt = "2.49"
 coroutine = "1.8.0"
+okHttpLogging = "4.9.3"
 
 
 [libraries]
@@ -37,10 +38,13 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-compose-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose"}
 androidx-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose"}
 
-androidx-compose-accompanist = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist"}
+androidx-accompanist-systemui = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist"}
+androidx-accompanist-swiperefresh = { group = "com.google.accompanist", name = "accompanist-swiperefresh", version.ref = "accompanist"}
 
 rerofit-base = { group = "com.squareup.retrofit2", name ="retrofit", version.ref = "retrofit" }
 rerofit-gson = { group = "com.squareup.retrofit2", name ="converter-gson", version.ref = "retrofit" }
+rerofit-logging = { group = "com.squareup.okhttp3", name ="logging-interceptor", version.ref = "okHttpLogging" }
+
 dagger-hilt = { group = "com.google.dagger", name ="hilt-android", version.ref = "hilt" }
 dagger-compiler = { group = "com.google.dagger", name ="hilt-compiler", version.ref = "hilt" }
 kotlin-coroutine = { group = "org.jetbrains.kotlinx", name ="kotlinx-coroutines-android", version.ref = "coroutine" }

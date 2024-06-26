@@ -4,7 +4,7 @@ import java.net.URI
 
 fun String.getIdFromPokemonUrl(): String {
     val parts = this.split("/")
-    return parts[4]
+    return parts.getOrNull(6).orEmpty()
 }
 
 fun String?.getOffsetFromUrl(): Int {

@@ -1,5 +1,6 @@
 package com.denisyordanp.pokemonapp.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,12 +15,14 @@ import androidx.compose.ui.unit.dp
 fun PokemonItem(
     modifier: Modifier = Modifier,
     name: String,
-    nickname: String? = null
+    nickname: String? = null,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(12.dp),
+            .clickable { onClick() }
+            .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
         nickname?.let {

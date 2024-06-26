@@ -7,6 +7,7 @@ import com.denisyordanp.pokemonapp.domain.api.FetchPokemons
 import com.denisyordanp.pokemonapp.schema.ui.Paging
 import com.denisyordanp.pokemonapp.schema.ui.Pokemon
 import com.denisyordanp.pokemonapp.util.UiState
+import com.denisyordanp.pokemonapp.util.UiStatus
 import com.denisyordanp.pokemonapp.util.errror
 import com.denisyordanp.pokemonapp.util.loadMore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,23 +27,26 @@ class PokemonListViewModel @Inject constructor(
     private val _pokemonState = MutableStateFlow<UiState<Paging<Pokemon>>>(UiState())
     val pokemonState = _pokemonState.asStateFlow()
 
-    fun loadPokemons(currentPaging: Paging<Pokemon>? = null) = viewModelScope.launch(dispatcher) {
-        if (currentPaging != null) {
-            _pokemonState.update {
-                it.loadMore()
-            }
+    fun loadPokemons(isRefresh: Boolean = false) = viewModelScope.launch(dispatcher) {
+        _pokemonState.update {
+            if (it.status != UiStatus.INITIAL) { it.loadMore() } else it
         }
 
         try {
-            val newPokemons = fetchPokemons(currentPaging?.offset)
-            val updatedPokemons = newPokemons.copy(
-                data = currentPaging?.data?.plus(newPokemons.data).orEmpty()
-            )
-            _pokemonState.emit(UiState.success(updatedPokemons))
-        } catch (e: Exception) {
             _pokemonState.update {
-                it.errror(e)
+                val updatedPokemons = if (isRefresh) {
+                    fetchPokemons()
+                } else {
+                    val newPokemons = fetchPokemons(it.data?.offset)
+                    newPokemons.copy(
+                        data = it.data?.data?.plus(newPokemons.data).orEmpty()
+                    )
+                }
+
+                UiState.success(updatedPokemons)
             }
+        } catch (e: Exception) {
+            _pokemonState.update { it.errror(e) }
         }
     }
 }

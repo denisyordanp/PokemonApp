@@ -23,6 +23,9 @@ android {
     kotlinOptions {
         jvmTarget = PokemonAndroidConfig.JVM_TARGET_VERSION
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -32,6 +35,7 @@ dependencies {
 
     implementation(libs.rerofit.base)
     implementation(libs.rerofit.gson)
+    implementation(libs.rerofit.logging)
 
     implementation(libs.dagger.hilt)
     kapt(libs.dagger.compiler)

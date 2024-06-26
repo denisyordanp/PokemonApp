@@ -8,27 +8,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.denisyordanp.pokemonapp.ui.component.TopBar
-import com.denisyordanp.pokemonapp.ui.screen.pokemonlist.PokemonListScreen
+import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations
+import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.DETAIL_SCREEN
+import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.MY_POKEMON_SCREEN
+import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.POKEMON_SCREEN
+import com.denisyordanp.pokemonapp.ui.screen.detail.pokemonDetailRoute
+import com.denisyordanp.pokemonapp.ui.screen.pokemonlist.pokemonListRoute
 import com.denisyordanp.pokemonapp.ui.theme.PokemonAppTheme
+import com.denisyordanp.pokemonapp.util.LocalCoroutineScope
+import com.denisyordanp.pokemonapp.util.LocalNavController
 import com.denisyordanp.pokemonapp.util.LocalSnackBar
 import com.denisyordanp.pokemonapp.util.currentActiveRoute
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -42,14 +46,9 @@ class MainActivity : ComponentActivity() {
                 // Will not handle the dark theme for now
                 darkTheme = false
             ) {
-                SetupSystemUI()
-
-                val snackBarHostState = remember { SnackbarHostState() }
-                val navController = rememberNavController()
-
-                CompositionLocalProvider(
-                    LocalSnackBar provides snackBarHostState,
-                ) {
+                PokemonLocalComposition {
+                    val snackBarHostState = LocalSnackBar.current
+                    val navController = LocalNavController.current
 
                     Scaffold(
                         modifier = Modifier
@@ -59,7 +58,7 @@ class MainActivity : ComponentActivity() {
                             TopBarContent(
                                 navController = navController,
                                 onCatchPressed = {
-                                    navController.navigate(AppNavigator.Destinations.MY_POKEMON_SCREEN.route)
+                                    navController.navigate(MY_POKEMON_SCREEN.route)
                                 },
                                 onBackPressed = {
                                     navController.navigateUp()
@@ -70,29 +69,13 @@ class MainActivity : ComponentActivity() {
                         NavHost(
                             modifier = Modifier.padding(padding),
                             navController = navController,
-                            startDestination = AppNavigator.Destinations.POKEMON_SCREEN.route
+                            startDestination = POKEMON_SCREEN.route
                         ) {
-                            composable(
-                                route = AppNavigator.Destinations.POKEMON_SCREEN.route,
-                            ) {
-                                PokemonListScreen(
-                                    onItemClicked = {
-                                        navController.navigate(AppNavigator.toDetailScreen(it.id))
-                                    }
-                                )
-                            }
+                            pokemonListRoute(this)
 
-                            composable(
-                                route = AppNavigator.Destinations.DETAIL_SCREEN.route,
-                                arguments = AppNavigator.detailScreenArguments
-                            ) { backStack ->
-                                backStack.arguments?.getString(AppNavigator.ID_ARGS)
-                                    ?.let { id ->
-                                        TODO("Detail screen")
-                                    }
-                            }
+                            pokemonDetailRoute(this)
 
-                            composable(AppNavigator.Destinations.MY_POKEMON_SCREEN.route) {
+                            composable(MY_POKEMON_SCREEN.route) {
                                 TODO("My pokemon screen")
                             }
                         }
@@ -103,19 +86,18 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun SetupSystemUI() {
-        val systemUiController = rememberSystemUiController()
-        val statusBarColor = MaterialTheme.colorScheme.background
-        SideEffect {
-            systemUiController.setStatusBarColor(
-                color = statusBarColor,
-                darkIcons = true,
-            )
-            systemUiController.setNavigationBarColor(
-                color = Color.Black,
-                darkIcons = false,
-            )
-        }
+    private fun PokemonLocalComposition(
+        content: @Composable () -> Unit
+    ) {
+        val snackBarHostState = remember { SnackbarHostState() }
+        val navController = rememberNavController()
+        val coroutineScope = rememberCoroutineScope()
+
+        CompositionLocalProvider(
+            LocalSnackBar provides snackBarHostState,
+            LocalNavController provides navController,
+            LocalCoroutineScope provides coroutineScope
+        ) { content() }
     }
 
     @Composable
@@ -137,13 +119,13 @@ class MainActivity : ComponentActivity() {
         )
     }
 
-    private fun AppNavigator.Destinations?.getTitle() = when (this) {
-        AppNavigator.Destinations.POKEMON_SCREEN -> "Pokemons"
-        AppNavigator.Destinations.DETAIL_SCREEN -> "Detail Pokemon"
-        AppNavigator.Destinations.MY_POKEMON_SCREEN -> "My Pokemons"
+    private fun Destinations?.getTitle() = when (this) {
+        POKEMON_SCREEN -> "Pokemons"
+        DETAIL_SCREEN -> "Detail Pokemon"
+        MY_POKEMON_SCREEN -> "My Pokemons"
         null -> ""
     }
 
-    private val AppNavigator.Destinations?.shouldShowBackButton get() = this == AppNavigator.Destinations.MY_POKEMON_SCREEN
-    private val AppNavigator.Destinations?.shouldShowRightButton get() = this == AppNavigator.Destinations.POKEMON_SCREEN
+    private val Destinations?.shouldShowBackButton get() = this == MY_POKEMON_SCREEN || this == DETAIL_SCREEN
+    private val Destinations?.shouldShowRightButton get() = this == POKEMON_SCREEN
 }
