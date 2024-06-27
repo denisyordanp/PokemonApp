@@ -1,12 +1,14 @@
 package com.denisyordanp.pokemonapp.domain.di
 
 import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
+import com.denisyordanp.pokemonapp.domain.api.CatchProbability
 import com.denisyordanp.pokemonapp.domain.api.EditPokemonNickname
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemonDetail
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemons
 import com.denisyordanp.pokemonapp.domain.api.LoadMyPokemon
 import com.denisyordanp.pokemonapp.domain.api.ReleasePokemon
 import com.denisyordanp.pokemonapp.domain.impl.CatchPokemonImpl
+import com.denisyordanp.pokemonapp.domain.impl.CatchProbabilityImpl
 import com.denisyordanp.pokemonapp.domain.impl.EditPokemonNicknameImpl
 import com.denisyordanp.pokemonapp.domain.impl.FetchPokemonDetailImpl
 import com.denisyordanp.pokemonapp.domain.impl.FetchPokemonsImpl
@@ -49,4 +51,9 @@ abstract class DomainModule {
     abstract fun bindReleasePokemon(
         releasePokemon: ReleasePokemonImpl
     ): ReleasePokemon
+
+    @Binds
+    abstract fun bindCatchProbability(
+        catchProbability: CatchProbabilityImpl
+    ): CatchProbability
 }

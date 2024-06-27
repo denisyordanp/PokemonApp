@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.denisyordanp.pokemonapp.common.di.IoDispatcher
 import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
+import com.denisyordanp.pokemonapp.domain.api.CatchProbability
 import com.denisyordanp.pokemonapp.domain.api.EditPokemonNickname
 import com.denisyordanp.pokemonapp.domain.api.FetchPokemonDetail
 import com.denisyordanp.pokemonapp.domain.api.ReleasePokemon
@@ -26,6 +27,7 @@ import javax.inject.Inject
 class PokemonDetailViewModel @Inject constructor(
     private val fetchDetailPokemon: FetchPokemonDetail,
     private val catchPokemon: CatchPokemon,
+    private val catchProbability: CatchProbability,
     private val editPokemonNickname: EditPokemonNickname,
     private val releasePokemon: ReleasePokemon,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
@@ -46,6 +48,8 @@ class PokemonDetailViewModel @Inject constructor(
             onError = { error -> _pokemonDetailState.update { it.errror(error) } }
         )
     }
+
+    fun tryToCatch() = catchProbability()
 
     fun catch(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
         safeCallWrapper(

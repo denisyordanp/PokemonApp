@@ -56,19 +56,13 @@ fun pokemonDetailRoute(
             route = DETAIL_SCREEN.route,
             arguments = detailScreenArguments
         ) { backStack ->
-            val context = LocalContext.current
             val snackBar = LocalSnackBar.current
             val coroutineScope = LocalCoroutineScope.current
 
             backStack.arguments?.getString(ID_ARGS)?.let {
                 PokemonDetailScreen(
                     id = it,
-                    onError = {
-                        coroutineScope.launch {
-                            snackBar.showSnackbar(context.getString(R.string.error_happening_please_try_again))
-                        }
-                    },
-                    onSuccessAction = {
+                    onShouldShowMessage = {
                         coroutineScope.launch {
                             snackBar.showSnackbar(it)
                         }
@@ -83,9 +77,9 @@ fun pokemonDetailRoute(
 private fun PokemonDetailScreen(
     viewModel: PokemonDetailViewModel = hiltViewModel(),
     id: String,
-    onSuccessAction: (message: String) -> Unit,
-    onError: (e: Exception) -> Unit,
+    onShouldShowMessage: (message: String) -> Unit
 ) {
+    val context = LocalContext.current
     val coroutineScope = LocalCoroutineScope.current
 
     LaunchedEffectOneTime {
@@ -108,11 +102,13 @@ private fun PokemonDetailScreen(
             pokemonDetailState.value.status == UiStatus.INITIAL
         }
     }
-    val selectedCatchPokemon =
+    val currentPokemonAction =
         remember { mutableStateOf<PokemonDetailActionType>(PokemonDetailActionType.Idle) }
 
     LaunchedEffectKeyed(pokemonDetailState.value) {
-        if (it?.status == UiStatus.ERROR) it.error?.apply(onError)
+        if (it?.status == UiStatus.ERROR) it.error?.apply {
+            onShouldShowMessage(context.getString(R.string.error_happening_please_try_again))
+        }
     }
 
     Column(
@@ -130,27 +126,34 @@ private fun PokemonDetailScreen(
             PokemonDetailContent(
                 pokemonDetail = it,
                 onMainActionButtonClicked = {
-                    selectedCatchPokemon.value = if (it.isMyPokemon) {
-                        PokemonDetailActionType.Release(it)
-                    } else PokemonDetailActionType.Catch(it)
+                    when {
+                        it.isMyPokemon -> currentPokemonAction.value =
+                            PokemonDetailActionType.Release(it)
+
+                        viewModel.tryToCatch() -> currentPokemonAction.value =
+                            PokemonDetailActionType.Catch(it)
+
+                        else -> onShouldShowMessage(
+                            context.getString(R.string.sorry_the_pokemon_is_running_away_try_again_later)
+                        )
+                    }
                 },
                 onEditNickname = {
-                    selectedCatchPokemon.value = PokemonDetailActionType.EditNickname(it)
+                    currentPokemonAction.value = PokemonDetailActionType.EditNickname(it)
                 }
             )
         }
     }
 
-    val context = LocalContext.current
     NicknameModal(
-        actionType = selectedCatchPokemon,
+        actionType = currentPokemonAction,
         onSubmit = { pokemon ->
             coroutineScope.launch {
                 val nickname = pokemon.nickname.orEmpty()
 
-                if (selectedCatchPokemon.value is PokemonDetailActionType.EditNickname) {
+                if (currentPokemonAction.value is PokemonDetailActionType.EditNickname) {
                     viewModel.editNickname(pokemon)
-                    onSuccessAction(
+                    onShouldShowMessage(
                         context.getString(
                             R.string.successfully_changed_nickname_to,
                             nickname
@@ -158,20 +161,20 @@ private fun PokemonDetailScreen(
                     )
                 } else {
                     viewModel.catch(pokemon)
-                    onSuccessAction(context.getString(R.string.successfully_caught, nickname))
+                    onShouldShowMessage(context.getString(R.string.successfully_caught, nickname))
                 }
-                selectedCatchPokemon.value = PokemonDetailActionType.Idle
+                currentPokemonAction.value = PokemonDetailActionType.Idle
             }
         }
     )
 
     ReleaseWarningModal(
-        actionType = selectedCatchPokemon,
+        actionType = currentPokemonAction,
         onYes = {
             coroutineScope.launch {
                 viewModel.release(it.id)
-                onSuccessAction(context.getString(R.string.successfully_released, it.name))
-                selectedCatchPokemon.value = PokemonDetailActionType.Idle
+                onShouldShowMessage(context.getString(R.string.successfully_released, it.name))
+                currentPokemonAction.value = PokemonDetailActionType.Idle
             }
         }
     )

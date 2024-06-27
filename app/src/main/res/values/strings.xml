@@ -22,4 +22,5 @@
     <string name="pokemons">Pokemons</string>
     <string name="detail_pokemon">Detail Pokemon</string>
     <string name="my_pokemons">My Pokemons</string>
+    <string name="sorry_the_pokemon_is_running_away_try_again_later">Sorry the pokemon is running away, try again later</string>
 </resources>
