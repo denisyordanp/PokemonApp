@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
@@ -43,6 +42,19 @@ fun LaunchedEffectOneTime(
             block()
             hasRun = true
         }
+    }
+}
+
+suspend fun <T> safeCallWrapper(
+    call: suspend () -> T,
+    onFinish: ( suspend (T) -> Unit)? = null,
+    onError: suspend (Exception) -> Unit = {},
+) {
+    try {
+        val result = call()
+        onFinish?.invoke(result)
+    } catch (e: Exception) {
+        onError(e)
     }
 }
 

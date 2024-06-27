@@ -12,6 +12,7 @@ import com.denisyordanp.pokemonapp.util.UiState
 import com.denisyordanp.pokemonapp.util.UiStatus
 import com.denisyordanp.pokemonapp.util.errror
 import com.denisyordanp.pokemonapp.util.loadMore
+import com.denisyordanp.pokemonapp.util.safeCallWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,28 +40,36 @@ class PokemonDetailViewModel @Inject constructor(
             } else it
         }
 
-        try {
-            val pokemonDetail = fetchDetailPokemon(id)
-            _pokemonDetailState.emit(UiState.success(pokemonDetail))
-        } catch (e: Exception) {
-            _pokemonDetailState.update { it.errror(e) }
-        }
+        safeCallWrapper(
+            call = { fetchDetailPokemon(id) },
+            onFinish = { _pokemonDetailState.emit(UiState.success(it)) },
+            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+        )
     }
 
     fun catch(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
-        val currentTime = Date().time
-        catchPokemon(pokemon, currentTime)
-        loadPokemonDetail(pokemon.id)
+        safeCallWrapper(
+            call = { catchPokemon(pokemon, getCurrentTime()) },
+            onFinish = { loadPokemonDetail(pokemon.id) },
+            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+        )
     }
 
     fun editNickname(pokemon: PokemonDetail) = viewModelScope.launch(dispatcher) {
-        val currentTime = Date().time
-        editPokemonNickname(pokemon, currentTime)
-        loadPokemonDetail(pokemon.id)
+        safeCallWrapper(
+            call = { editPokemonNickname(pokemon, getCurrentTime()) },
+            onFinish = { loadPokemonDetail(pokemon.id) },
+            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+        )
     }
 
     fun release(id: String) = viewModelScope.launch(dispatcher) {
-        releasePokemon(id)
-        loadPokemonDetail(id)
+        safeCallWrapper(
+            call = { releasePokemon(id) },
+            onFinish = { loadPokemonDetail(id) },
+            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+        )
     }
+
+    private fun getCurrentTime() = Date().time
 }
