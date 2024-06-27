@@ -28,10 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.denisyordanp.pokemonapp.R
 import com.denisyordanp.pokemonapp.schema.ui.PokemonDetail
 import com.denisyordanp.pokemonapp.ui.component.CenterLoading
 import com.denisyordanp.pokemonapp.ui.component.TopBarLoading
@@ -53,6 +56,7 @@ fun pokemonDetailRoute(
             route = DETAIL_SCREEN.route,
             arguments = detailScreenArguments
         ) { backStack ->
+            val context = LocalContext.current
             val snackBar = LocalSnackBar.current
             val coroutineScope = LocalCoroutineScope.current
 
@@ -61,7 +65,7 @@ fun pokemonDetailRoute(
                     id = it,
                     onError = {
                         coroutineScope.launch {
-                            snackBar.showSnackbar("Error happening, please try again.")
+                            snackBar.showSnackbar(context.getString(R.string.error_happening_please_try_again))
                         }
                     },
                     onSuccessAction = {
@@ -137,6 +141,7 @@ private fun PokemonDetailScreen(
         }
     }
 
+    val context = LocalContext.current
     NicknameModal(
         actionType = selectedCatchPokemon,
         onSubmit = { pokemon ->
@@ -145,10 +150,15 @@ private fun PokemonDetailScreen(
 
                 if (selectedCatchPokemon.value is PokemonDetailActionType.EditNickname) {
                     viewModel.editNickname(pokemon)
-                    onSuccessAction("Successfully changed nickname to $nickname")
+                    onSuccessAction(
+                        context.getString(
+                            R.string.successfully_changed_nickname_to,
+                            nickname
+                        )
+                    )
                 } else {
                     viewModel.catch(pokemon)
-                    onSuccessAction("$nickname successfully caught")
+                    onSuccessAction(context.getString(R.string.successfully_caught, nickname))
                 }
                 selectedCatchPokemon.value = PokemonDetailActionType.Idle
             }
@@ -160,7 +170,7 @@ private fun PokemonDetailScreen(
         onYes = {
             coroutineScope.launch {
                 viewModel.release(it.id)
-                onSuccessAction("${it.name} successfully released")
+                onSuccessAction(context.getString(R.string.successfully_released, it.name))
                 selectedCatchPokemon.value = PokemonDetailActionType.Idle
             }
         }
@@ -195,25 +205,25 @@ private fun PokemonDetailContent(
         )
 
         Text(
-            text = "Species: ${pokemonDetail.species.name.capitalize()}",
+            text = stringResource(R.string.species, pokemonDetail.species.name.capitalize()),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
-            text = "Base Experience: ${pokemonDetail.baseExperience}",
+            text = stringResource(R.string.base_experience, pokemonDetail.baseExperience),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
-            text = "Height: ${pokemonDetail.height / 10.0} m",
+            text = stringResource(R.string.height_m, pokemonDetail.height / 10.0),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
-            text = "Weight: ${pokemonDetail.weight / 10.0} kg",
+            text = stringResource(R.string.weight_kg, pokemonDetail.weight / 10.0),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -226,7 +236,7 @@ private fun PokemonDetailContent(
                     modifier = Modifier.padding(16.dp),
                     onClick = onEditNickname
                 ) {
-                    Text(text = "Edit nickname")
+                    Text(text = stringResource(R.string.edit_nickname))
                 }
             }
 
@@ -234,9 +244,9 @@ private fun PokemonDetailContent(
                 modifier = Modifier.padding(16.dp),
                 onClick = onMainActionButtonClicked
             ) {
-                Text(
-                    text = if (pokemonDetail.isMyPokemon) "Release this Pokemon" else "Catch this Pokemon"
-                )
+                val text =
+                    if (pokemonDetail.isMyPokemon) R.string.release_this_pokemon else R.string.catch_this_pokemon
+                Text(text = stringResource(id = text))
             }
         }
     }
@@ -268,7 +278,10 @@ private fun NicknameModal(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val title = if (isEdit) "Edit nickname for ${it.name}" else "Catch ${it.name}"
+                    val title = if (isEdit) stringResource(
+                        R.string.edit_nickname_for,
+                        it.name
+                    ) else stringResource(R.string.catch_name, it.name)
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium
@@ -277,7 +290,7 @@ private fun NicknameModal(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     OutlinedTextField(modifier = Modifier.fillMaxWidth(), label = {
-                        Text(text = "Enter nickname")
+                        Text(text = stringResource(R.string.enter_nickname))
                     }, value = nicknameText, onValueChange = { nicknameText = it })
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -285,7 +298,8 @@ private fun NicknameModal(
                     OutlinedButton(onClick = {
                         onSubmit(it.copy(nickname = nicknameText))
                     }) {
-                        val text = if (isEdit) "Save" else "Catch"
+                        val text =
+                            if (isEdit) stringResource(R.string.save) else stringResource(R.string.catch_button)
                         Text(text = text)
                     }
                 }
@@ -314,7 +328,7 @@ private fun ReleaseWarningModal(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Are you sure want to release ${it.name}}",
+                        text = stringResource(R.string.are_you_sure_want_to_release, it.name),
                         style = MaterialTheme.typography.titleMedium
                     )
 
@@ -324,7 +338,7 @@ private fun ReleaseWarningModal(
                         OutlinedButton(onClick = {
                             actionType.value = PokemonDetailActionType.Idle
                         }) {
-                            Text(text = "Cancel")
+                            Text(text = stringResource(R.string.cancel))
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -332,7 +346,7 @@ private fun ReleaseWarningModal(
                         OutlinedButton(onClick = {
                             onYes(it)
                         }) {
-                            Text(text = "Yes")
+                            Text(text = stringResource(R.string.yes))
                         }
                     }
                 }

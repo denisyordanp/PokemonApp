@@ -18,9 +18,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.denisyordanp.pokemonapp.R
 import com.denisyordanp.pokemonapp.ui.component.TopBar
 import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations
 import com.denisyordanp.pokemonapp.ui.main.AppNavigator.Destinations.DETAIL_SCREEN
@@ -119,9 +119,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun Destinations?.getTitle() = when (this) {
-        POKEMON_SCREEN -> "Pokemons"
-        DETAIL_SCREEN -> "Detail Pokemon"
-        MY_POKEMON_SCREEN -> "My Pokemons"
+        POKEMON_SCREEN -> getString(R.string.pokemons)
+        DETAIL_SCREEN -> getString(R.string.detail_pokemon)
+        MY_POKEMON_SCREEN -> getString(R.string.my_pokemons)
         null -> ""
     }
 

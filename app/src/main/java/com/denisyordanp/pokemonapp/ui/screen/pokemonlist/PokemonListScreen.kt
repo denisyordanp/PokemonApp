@@ -9,9 +9,11 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.denisyordanp.pokemonapp.R
 import com.denisyordanp.pokemonapp.schema.ui.Paging
 import com.denisyordanp.pokemonapp.schema.ui.Pokemon
 import com.denisyordanp.pokemonapp.ui.component.CenterLoading
@@ -36,6 +38,7 @@ fun pokemonListRoute(
         composable(
             route = AppNavigator.Destinations.POKEMON_SCREEN.route,
         ) {
+            val context = LocalContext.current
             val navController = LocalNavController.current
             val snackBar = LocalSnackBar.current
             val coroutineScope = LocalCoroutineScope.current
@@ -46,7 +49,7 @@ fun pokemonListRoute(
                 },
                 onError = {
                     coroutineScope.launch {
-                        snackBar.showSnackbar("Error happening, please try again.")
+                        snackBar.showSnackbar(context.getString(R.string.error_happening_please_try_again))
                     }
                 }
             )

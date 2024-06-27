@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Pokemon App</string>
+    <string name="species">Species: %1$s</string>
+    <string name="base_experience">Base Experience: %1$s</string>
+    <string name="height_m">Height: %1$s m</string>
+    <string name="weight_kg">Weight: %1$s kg</string>
+    <string name="edit_nickname">Edit nickname</string>
+    <string name="release_this_pokemon">Release this Pokemon</string>
+    <string name="catch_this_pokemon">Catch this Pokemon</string>
+    <string name="edit_nickname_for">Edit nickname for %1$s</string>
+    <string name="catch_name">Catch %1$s</string>
+    <string name="enter_nickname">Enter nickname</string>
+    <string name="save">Save</string>
+    <string name="catch_button">Catch</string>
+    <string name="error_happening_please_try_again">Error happening, please try again.</string>
+    <string name="successfully_changed_nickname_to">Successfully changed nickname to %1$s</string>
+    <string name="successfully_caught">%1$s successfully caught</string>
+    <string name="successfully_released">%1$s successfully released</string>
+    <string name="are_you_sure_want_to_release">Are you sure want to release %1$s}</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="pokemons">Pokemons</string>
+    <string name="detail_pokemon">Detail Pokemon</string>
+    <string name="my_pokemons">My Pokemons</string>
 </resources>

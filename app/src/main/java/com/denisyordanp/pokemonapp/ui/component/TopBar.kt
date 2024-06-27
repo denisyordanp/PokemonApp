@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,9 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.denisyordanp.pokemonapp.ui.theme.PokemonAppTheme
 
 @Composable
 fun TopBar(
@@ -75,20 +72,5 @@ fun TopBar(
                 }
             }
         }
-    }
-}
-
-@Composable
-@Preview(showBackground = true)
-private fun Preview() {
-    PokemonAppTheme {
-        TopBar(
-            title = "Pokemon List",
-            showBackButton = true,
-            showRightButton = true,
-            rightButtonIcon = Icons.Default.AddCircle,
-            onRightButtonPressed = {},
-            onBackPressed = {}
-        )
     }
 }
