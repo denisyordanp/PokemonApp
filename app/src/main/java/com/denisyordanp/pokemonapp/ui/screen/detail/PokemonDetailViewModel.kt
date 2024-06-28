@@ -2,7 +2,7 @@ package com.denisyordanp.pokemonapp.ui.screen.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.denisyordanp.pokemonapp.common.di.IoDispatcher
+import com.denisyordanp.pokemonapp.common.di.DefaultDispatcher
 import com.denisyordanp.pokemonapp.domain.api.CatchPokemon
 import com.denisyordanp.pokemonapp.domain.api.CatchProbability
 import com.denisyordanp.pokemonapp.domain.api.EditPokemonNickname
@@ -11,7 +11,7 @@ import com.denisyordanp.pokemonapp.domain.api.ReleasePokemon
 import com.denisyordanp.pokemonapp.schema.ui.PokemonDetail
 import com.denisyordanp.pokemonapp.util.UiState
 import com.denisyordanp.pokemonapp.util.UiStatus
-import com.denisyordanp.pokemonapp.util.errror
+import com.denisyordanp.pokemonapp.util.error
 import com.denisyordanp.pokemonapp.util.loadMore
 import com.denisyordanp.pokemonapp.util.safeCallWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +30,7 @@ class PokemonDetailViewModel @Inject constructor(
     private val catchProbability: CatchProbability,
     private val editPokemonNickname: EditPokemonNickname,
     private val releasePokemon: ReleasePokemon,
-    @IoDispatcher private val dispatcher: CoroutineDispatcher
+    @DefaultDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
     private val _pokemonDetailState = MutableStateFlow<UiState<PokemonDetail>>(UiState())
     val pokemonDetailState = _pokemonDetailState.asStateFlow()
@@ -45,7 +45,7 @@ class PokemonDetailViewModel @Inject constructor(
         safeCallWrapper(
             call = { fetchDetailPokemon(id) },
             onFinish = { _pokemonDetailState.emit(UiState.success(it)) },
-            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+            onError = { error -> _pokemonDetailState.update { it.error(error) } }
         )
     }
 
@@ -55,7 +55,7 @@ class PokemonDetailViewModel @Inject constructor(
         safeCallWrapper(
             call = { catchPokemon(pokemon, getCurrentTime()) },
             onFinish = { loadPokemonDetail(pokemon.id) },
-            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+            onError = { error -> _pokemonDetailState.update { it.error(error) } }
         )
     }
 
@@ -63,7 +63,7 @@ class PokemonDetailViewModel @Inject constructor(
         safeCallWrapper(
             call = { editPokemonNickname(pokemon, getCurrentTime()) },
             onFinish = { loadPokemonDetail(pokemon.id) },
-            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+            onError = { error -> _pokemonDetailState.update { it.error(error) } }
         )
     }
 
@@ -71,7 +71,7 @@ class PokemonDetailViewModel @Inject constructor(
         safeCallWrapper(
             call = { releasePokemon(id) },
             onFinish = { loadPokemonDetail(id) },
-            onError = { error -> _pokemonDetailState.update { it.errror(error) } }
+            onError = { error -> _pokemonDetailState.update { it.error(error) } }
         )
     }
 

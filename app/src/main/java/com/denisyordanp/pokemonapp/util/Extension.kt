@@ -48,15 +48,15 @@ fun LaunchedEffectOneTime(
 suspend fun <T> safeCallWrapper(
     call: suspend () -> T,
     onFinish: ( suspend (T) -> Unit)? = null,
-    onError: suspend (Exception) -> Unit = {},
+    onError: (suspend (Exception) -> Unit)? = null,
 ) {
     try {
         val result = call()
         onFinish?.invoke(result)
     } catch (e: Exception) {
-        onError(e)
+        onError?.invoke(e)
     }
 }
 
 fun <T> UiState<T>.loadMore() = this.copy(error = null, status = UiStatus.LOAD_MORE)
-fun <T> UiState<T>.errror(exception: Exception) = this.copy(error = exception, status = UiStatus.ERROR)
+fun <T> UiState<T>.error(exception: Exception) = this.copy(error = exception, status = UiStatus.ERROR)
