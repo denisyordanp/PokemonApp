@@ -8,7 +8,7 @@ import com.denisyordanp.pokemonapp.schema.ui.Paging
 import com.denisyordanp.pokemonapp.schema.ui.Pokemon
 import com.denisyordanp.pokemonapp.util.UiState
 import com.denisyordanp.pokemonapp.util.UiStatus
-import com.denisyordanp.pokemonapp.util.errror
+import com.denisyordanp.pokemonapp.util.error
 import com.denisyordanp.pokemonapp.util.loadMore
 import com.denisyordanp.pokemonapp.util.safeCallWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -53,7 +53,7 @@ class PokemonListViewModel @Inject constructor(
 
                 _pokemonState.emit(UiState.success(updatedPokemons))
             },
-            onError = { error -> _pokemonState.update { it.errror(error) } }
+            onError = { error -> _pokemonState.update { it.error(error) } }
         )
     }
 }
